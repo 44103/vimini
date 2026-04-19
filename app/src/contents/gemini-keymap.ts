@@ -121,6 +121,40 @@ function handleKeydown(e: KeyboardEvent) {
     return;
   }
 
+  // Alt+r -> quote focused message into editor
+  if (e.key === "r" && e.altKey && !e.ctrlKey && !e.shiftKey && msgIndex !== -1) {
+    e.preventDefault();
+    e.stopPropagation();
+    const msgs = getMessages();
+    const el = msgs[msgIndex];
+    if (el) {
+      const code = el.tagName === "RESPONSE-ELEMENT"
+        ? el.querySelector<HTMLElement>("code.code-container")
+        : null;
+      const text = (code ?? el).innerText.trim();
+      const quoted = text.split("\n").map((l) => `> ${l}`).join("\n");
+      const editor = document.querySelector<HTMLElement>(EDITOR_SEL);
+      if (editor) {
+        const current = editor.innerText.trim();
+        const prefix = current && current !== "" ? current + "\n\n" : "";
+        editor.innerHTML = (prefix + quoted + "\n\n")
+          .split("\n")
+          .map((line) => `<p>${line || "<br>"}</p>`)
+          .join("");
+        editor.dispatchEvent(new Event("input", { bubbles: true }));
+        // Move cursor to end
+        const sel = window.getSelection();
+        if (sel) {
+          sel.selectAllChildren(editor);
+          sel.collapseToEnd();
+        }
+        msgIndex = -1;
+        focusEditor();
+      }
+    }
+    return;
+  }
+
   // Escape -> return to editor
   if (e.key === "Escape" && msgIndex !== -1) {
     e.preventDefault();
