@@ -106,6 +106,21 @@ function handleKeydown(e: KeyboardEvent) {
     return;
   }
 
+  // Alt+y -> copy focused message text to clipboard
+  if (e.key === "y" && e.altKey && !e.ctrlKey && !e.shiftKey && msgIndex !== -1) {
+    e.preventDefault();
+    e.stopPropagation();
+    const msgs = getMessages();
+    const el = msgs[msgIndex];
+    if (el) {
+      const code = el.tagName === "RESPONSE-ELEMENT"
+        ? el.querySelector<HTMLElement>("code.code-container")
+        : null;
+      navigator.clipboard.writeText((code ?? el).innerText.trim());
+    }
+    return;
+  }
+
   // Escape -> return to editor
   if (e.key === "Escape" && msgIndex !== -1) {
     e.preventDefault();
