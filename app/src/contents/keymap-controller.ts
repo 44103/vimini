@@ -86,18 +86,18 @@ export function initKeymapController(adapter: SiteAdapter) {
       return;
     }
 
-    // Ctrl+Enter -> send
-    if (e.key === "Enter" && e.ctrlKey && !e.shiftKey) {
+    // Ctrl+Enter or Shift+Enter -> send
+    if (e.key === "Enter" && (e.ctrlKey || e.shiftKey) && !e.metaKey) {
       e.preventDefault();
       e.stopPropagation();
       adapter.send();
       return;
     }
 
-    // Enter (plain) -> newline
+    // Enter (plain) -> newline (block default send behavior)
     if (e.key === "Enter" && !e.ctrlKey && !e.shiftKey && !e.metaKey) {
       e.preventDefault();
-      e.stopPropagation();
+      e.stopImmediatePropagation();
       document.execCommand("insertLineBreak");
     }
   }

@@ -1,7 +1,7 @@
 import type { SiteAdapter } from "../site-adapter";
 
 const EDITOR_SEL = "div.ql-editor[contenteditable='true']";
-const SEND_BTN_SEL = "button.send-button";
+const SEND_BTN_SEL = ".send-button-container button, button[aria-label='プロンプトを送信'], button[aria-label='Send prompt']";
 const RESPONSE_BLOCK_SEL =
   ":scope .markdown > p, :scope .markdown > h3, :scope .markdown > ol, :scope .markdown > ul, :scope .markdown > response-element";
 
