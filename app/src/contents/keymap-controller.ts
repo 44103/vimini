@@ -74,9 +74,24 @@ export function initKeymapController(adapter: SiteAdapter) {
     }
   }
 
+  // Track IME composition state explicitly for reliable detection
+  let composing = false;
+  document.addEventListener("compositionstart", () => { composing = true; }, true);
+  document.addEventListener("compositionend", () => { composing = false; }, true);
+
+  function isIMEActive(e: KeyboardEvent): boolean {
+    // e.isComposing: standard check
+    // e.keyCode === 229: Chromium signals IME-processed key
+    // composing flag: covers edge cases where compositionend fires after keydown
+    return e.isComposing || e.keyCode === 229 || composing;
+  }
+
   function handleInsertMode(e: KeyboardEvent) {
     const target = e.target as HTMLElement;
     if (!adapter.isEditor(target)) return;
+
+    // Skip all key handling during IME composition
+    if (isIMEActive(e)) return;
 
     // Esc -> normal mode
     if (e.key === "Escape") {
@@ -98,7 +113,7 @@ export function initKeymapController(adapter: SiteAdapter) {
     if (e.key === "Enter" && !e.ctrlKey && !e.shiftKey && !e.metaKey) {
       e.preventDefault();
       e.stopImmediatePropagation();
-      document.execCommand("insertLineBreak");
+      document.execCommand("insertParagraph");
     }
   }
 
