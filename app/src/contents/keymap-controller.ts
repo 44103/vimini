@@ -144,10 +144,10 @@ export function initKeymapController(adapter: SiteAdapter) {
         if (msgs.length === 0) return;
         if (msgIndex < msgs.length - 1) {
           msgIndex++;
-          highlightAndScroll(msgs[msgIndex]);
-        } else {
-          enterInsertMode();
+        } else if (msgIndex === -1) {
+          msgIndex = 0;
         }
+        highlightAndScroll(msgs[msgIndex]);
         return;
       }
 
