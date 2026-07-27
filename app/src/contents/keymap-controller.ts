@@ -3,6 +3,7 @@
 // Normal mode: navigating messages (Esc to enter, i to exit)
 
 import type { SiteAdapter } from "./site-adapter";
+import { getSettings, onSettingsChange, type SendShortcutSettings, DEFAULT_SETTINGS } from "../storage";
 
 const HIGHLIGHT_STYLE = "box-shadow: 0 0 0 3px #4285f4; border-radius: 8px;";
 const HIGHLIGHT_STYLE_CODE =
@@ -30,8 +31,13 @@ function updateModeIndicator(el: HTMLElement, mode: Mode) {
 export function initKeymapController(adapter: SiteAdapter) {
   let mode: Mode = "insert";
   let msgIndex = -1;
+  let settings: SendShortcutSettings = DEFAULT_SETTINGS;
   const indicator = createModeIndicator();
   updateModeIndicator(indicator, mode);
+
+  // Load settings and listen for changes
+  getSettings().then((s) => { settings = s; });
+  onSettingsChange((s) => { settings = s; });
 
   function clearHighlight() {
     document.querySelectorAll<HTMLElement>("[data-keymap-highlight]").forEach((el) => {
@@ -101,12 +107,17 @@ export function initKeymapController(adapter: SiteAdapter) {
       return;
     }
 
-    // Ctrl+Enter or Shift+Enter -> send
-    if (e.key === "Enter" && (e.ctrlKey || e.shiftKey) && !e.metaKey) {
-      e.preventDefault();
-      e.stopPropagation();
-      adapter.send();
-      return;
+    // Ctrl+Enter or Shift+Enter -> send (based on settings)
+    if (e.key === "Enter" && !e.metaKey) {
+      const shouldSend =
+        (e.ctrlKey && !e.shiftKey && settings.ctrlEnter) ||
+        (e.shiftKey && !e.ctrlKey && settings.shiftEnter);
+      if (shouldSend) {
+        e.preventDefault();
+        e.stopPropagation();
+        adapter.send();
+        return;
+      }
     }
 
     // Enter (plain) -> newline (block default send behavior)

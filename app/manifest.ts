@@ -6,6 +6,7 @@ const manifest: ManifestV3Export = {
   name: "Vimini",
   version: packageJson.version,
   description: "Vim-like keybindings for Gemini",
+  permissions: ["storage"],
   action: { default_popup: "src/popup/index.html" },
   content_scripts: [
     {
